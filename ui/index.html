@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080a;
+  --s1:#0c0f12;
+  --s2:#12161a;
+  --s3:#1a1f24;
+  --b1:#1e2429;
+  --b2:#2a3038;
+  --b3:#3a4250;
+  --txt:#e8e4dc;
+  --txt2:#8a9099;
+  --txt3:#4a5260;
+  --gr:#9bec5f;
+  --gr2:#7dd43e;
+  --gr-dim:rgba(155,236,95,0.07);
+  --gr-bdr:rgba(155,236,95,0.18);
+  --pur:#a78bfa;
+  --teal:#4dd9c0;
+  --amb:#f59e0b;
+  --red:#f87171;
+}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Geist Mono',monospace;font-size:13px;line-height:1.6}
+
+/* animated bg grid */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(155,236,95,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(155,236,95,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;z-index:0;
+}
+
+.wrap{max-width:780px;margin:0 auto;padding:56px 24px 100px;position:relative;z-index:1}
+
+/* ── Header ── */
+.hd{margin-bottom:52px}
+.hd-top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.badge{
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 10px;border:1px solid var(--gr-bdr);border-radius:2px;
+  color:var(--gr);background:var(--gr-dim);
+}
+.title{font-family:'Fraunces',serif;font-size:36px;font-weight:300;letter-spacing:-.5px;line-height:1.1;color:var(--txt)}
+.title em{font-style:italic;color:var(--gr)}
+.sub{font-size:12px;color:var(--txt3);margin-top:8px;letter-spacing:.04em}
+
+/* ── Input card ── */
+.card{
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:8px;
+  margin-bottom:28px;
+  transition:border-color .2s;
+}
+.card:focus-within{border-color:var(--gr-bdr);box-shadow:0 0 0 4px var(--gr-dim)}
+.card-lbl{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gr);padding:14px 16px 0;
+}
+.card-lbl::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gr);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  color:var(--txt);font-family:'Geist Mono',monospace;font-size:14px;
+  padding:8px 16px 12px;resize:none;min-height:72px;
+}
+textarea::placeholder{color:var(--txt3)}
+
+.card-ft{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;border-top:1px solid var(--b1);gap:12px;
+}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.chip{
+  font-size:10px;padding:3px 10px;
+  border:1px solid var(--b2);border-radius:2px;
+  color:var(--txt3);cursor:pointer;background:transparent;
+  font-family:'Geist Mono',monospace;
+  transition:all .15s;
+}
+.chip:hover{border-color:var(--b3);color:var(--txt2)}
+
+.run{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 20px;
+  background:var(--gr);color:#06080a;
+  border:none;border-radius:4px;
+  font-family:'Geist Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.06em;cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.run:hover{background:var(--gr2);transform:translateY(-1px)}
+.run:active{transform:none}
+.run:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.run .sp{width:11px;height:11px;border:1.5px solid rgba(0,0,0,.25);border-top-color:#06080a;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.run.ld .sp{display:block}
+.run.ld .rt{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Pipeline ── */
+#pipe{display:none;margin-bottom:28px;animation:up .4s ease both}
+.pipe-lbl{font-size:10px;letter-spacing:.1em;color:var(--txt3);text-transform:uppercase;margin-bottom:14px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.step{
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:6px;padding:14px 12px;
+  display:flex;flex-direction:column;gap:6px;
+  transition:all .3s;
+}
+.step-ico{font-size:18px;color:var(--txt3);transition:color .3s}
+.step-name{font-size:11px;color:var(--txt3);letter-spacing:.06em;transition:color .3s}
+.step-status{font-size:10px;color:var(--txt3);letter-spacing:.04em;min-height:14px;transition:color .3s}
+
+.step.active{border-color:var(--gr-bdr);background:var(--gr-dim)}
+.step.active .step-ico,.step.active .step-name{color:var(--gr)}
+.step.active .step-status{color:var(--gr)}
+
+.step.done{border-color:var(--b2)}
+.step.done .step-ico,.step.done .step-name{color:var(--txt)}
+.step.done .step-status{color:var(--teal)}
+
+.step.fail .step-ico,.step.fail .step-name,.step.fail .step-status{color:var(--red)}
+
+/* ── Logs ── */
+#logs{display:none;margin-bottom:28px;animation:up .4s ease both}
+.log-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-bottom:1px solid var(--b1);
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);
+  background:var(--s1);border-radius:6px 6px 0 0;border:1px solid var(--b1);border-bottom:none;
+}
+.log-dot{width:5px;height:5px;border-radius:50%;background:var(--gr);animation:blink 1s ease infinite}
+.log-bd{
+  background:var(--s2);border:1px solid var(--b1);border-top:none;
+  border-radius:0 0 6px 6px;padding:12px 14px;
+  max-height:148px;overflow-y:auto;
+}
+.log-bd::-webkit-scrollbar{width:3px}
+.log-bd::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+.le{display:flex;gap:12px;font-size:11px;line-height:1.7;opacity:0;animation:fi .3s ease forwards}
+.lt{color:var(--txt3);flex-shrink:0;font-size:10px;padding-top:1px}
+.lm.pl{color:var(--pur)}
+.lm.sr{color:var(--teal)}
+.lm.cr{color:var(--amb)}
+.lm.sy{color:var(--gr)}
+.lm.in{color:var(--txt3)}
+
+@keyframes fi{to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Stats ── */
+#stats{display:none;margin-bottom:28px;animation:up .4s ease both}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.stat{
+  background:var(--s1);border:1px solid var(--b1);border-radius:6px;
+  padding:16px 14px;
+}
+.st-lbl{font-size:10px;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.st-val{font-family:'Fraunces',serif;font-size:28px;font-weight:300;color:var(--gr);line-height:1}
+
+/* ── Report ── */
+#rep{display:none;animation:up .5s ease both}
+.rep-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rep-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
+.rep-acts{display:flex;gap:6px}
+.rep-btn{
+  font-size:10px;padding:4px 10px;
+  border:1px solid var(--b2);border-radius:2px;background:transparent;
+  color:var(--txt3);cursor:pointer;font-family:'Geist Mono',monospace;
+  transition:all .15s;
+}
+.rep-btn:hover{border-color:var(--b3);color:var(--txt)}
+
+.rep-body{
+  background:var(--s1);border:1px solid var(--b1);border-radius:8px;
+  padding:32px 36px;
+}
+.rep-body h1{
+  font-family:'Fraunces',serif;font-size:26px;font-weight:300;
+  color:var(--txt);margin-bottom:20px;line-height:1.25;letter-spacing:-.3px;
+}
+.rep-body h2{
+  font-family:'Fraunces',serif;font-size:17px;font-weight:300;font-style:italic;
+  color:var(--gr);margin:28px 0 10px;
+}
+.rep-body p{color:var(--txt2);margin-bottom:12px;line-height:1.75;font-size:13px}
+.rep-body ul{margin:8px 0 12px;padding:0;list-style:none}
+.rep-body li{color:var(--txt2);padding:3px 0 3px 20px;position:relative;font-size:13px;line-height:1.7}
+.rep-body li::before{content:'→';position:absolute;left:0;color:var(--txt3)}
+.rep-body a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(77,217,192,.2)}
+.rep-body a:hover{border-color:var(--teal)}
+
+.src-sec{margin-top:28px;padding-top:20px;border-top:1px solid var(--b1)}
+.src-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px}
+.src-item{display:flex;gap:10px;padding:4px 0;font-size:11px}
+.src-n{color:var(--txt3);flex-shrink:0;min-width:20px}
+.src-url{color:var(--teal);word-break:break-all}
+
+/* ── Error ── */
+#err{
+  display:none;border:1px solid rgba(248,113,113,.3);border-radius:6px;
+  padding:14px 18px;background:rgba(248,113,113,.05);
+  color:var(--red);font-size:12px;line-height:1.6;animation:up .3s ease both;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hd">
+    <div class="hd-top">
+      <span class="badge">Multi-agent · LangGraph · Groq</span>
+    </div>
+    <h1 class="title">Research<br><em>Agent</em></h1>
+    <p class="sub">Planner → Parallel search → Critic → Synthesizer</p>
+  </header>
+
+  <div class="card">
+    <div class="card-lbl">Query</div>
+    <textarea id="q" placeholder="What do you want to research deeply?" rows="3"></textarea>
+    <div class="card-ft">
+      <div class="chips">
+        <button class="chip" onclick="sq('What is the future of nuclear fusion energy?')">nuclear fusion</button>
+        <button class="chip" onclick="sq('How does LangGraph work and when to use it?')">LangGraph</button>
+        <button class="chip" onclick="sq('Global AI regulation policies in 2025')">AI regulation</button>
+        <button class="chip" onclick="sq('Breakthroughs in quantum computing hardware')">quantum computing</button>
+      </div>
+      <button class="run" id="rb" onclick="go()">
+        <div class="sp"></div>
+        <span class="rt">↗ Research</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="pipe">
+    <div class="pipe-lbl">Pipeline</div>
+    <div class="steps">
+      <div class="step" id="s-pl">
+        <span style="font-size:18px;color:inherit" id="si-pl">◎</span>
+        <div class="step-name">Planner</div>
+        <div class="step-status" id="ss-pl">waiting</div>
+      </div>
+      <div class="step" id="s-sr">
+        <span style="font-size:18px;color:inherit" id="si-sr">⊙</span>
+        <div class="step-name">Searcher</div>
+        <div class="step-status" id="ss-sr">waiting</div>
+      </div>
+      <div class="step" id="s-cr">
+        <span style="font-size:18px;color:inherit" id="si-cr">◈</span>
+        <div class="step-name">Critic</div>
+        <div class="step-status" id="ss-cr">waiting</div>
+      </div>
+      <div class="step" id="s-sy">
+        <span style="font-size:18px;color:inherit" id="si-sy">◇</span>
+        <div class="step-name">Synthesizer</div>
+        <div class="step-status" id="ss-sy">waiting</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="logs">
+    <div class="log-hd"><div class="log-dot"></div>Live output</div>
+    <div class="log-bd" id="lb"></div>
+  </div>
+
+  <div id="stats">
+    <div class="stats-grid">
+      <div class="stat"><div class="st-lbl">Sub-tasks</div><div class="st-val" id="sv-t">—</div></div>
+      <div class="stat"><div class="st-lbl">Sources</div><div class="st-val" id="sv-s">—</div></div>
+      <div class="stat"><div class="st-lbl">Duration</div><div class="st-val" id="sv-d">—</div></div>
+      <div class="stat"><div class="st-lbl">Retries</div><div class="st-val" id="sv-r">—</div></div>
+    </div>
+  </div>
+
+  <div id="err"></div>
+
+  <div id="rep">
+    <div class="rep-hd">
+      <div class="rep-lbl">Research Report</div>
+      <div class="rep-acts">
+        <button class="rep-btn" onclick="cp()">Copy markdown</button>
+        <button class="rep-btn" onclick="nr()">↺ New research</button>
+      </div>
+    </div>
+    <div class="rep-body" id="rb2"></div>
+    <div class="src-sec" id="src"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+const API='http://127.0.0.1:8000';
+let jid=null,poll=null,raw='';
+
+function sq(t){document.getElementById('q').value=t;document.getElementById('q').focus()}
+
+function addLog(msg,cls='in'){
+  const b=document.getElementById('lb');
+  const now=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=document.createElement('div');
+  d.className='le';
+  d.innerHTML=`<span class="lt">${now}</span><span class="lm ${cls}">${msg}</span>`;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+
+function step(id,state,status){
+  document.getElementById('s-'+id).className='step '+state;
+  if(status)document.getElementById('ss-'+id).textContent=status;
+}
+
+function hide(id){document.getElementById(id).style.display='none'}
+function show(id,d='block'){document.getElementById(id).style.display=d}
+
+function reset(){
+  hide('pipe');hide('logs');hide('stats');hide('rep');hide('err');
+  document.getElementById('lb').innerHTML='';
+  document.getElementById('rb2').innerHTML='';
+  document.getElementById('src').innerHTML='';
+  ['pl','sr','cr','sy'].forEach(s=>step(s,'','waiting'));
+}
+
+async function go(){
+  const q=document.getElementById('q').value.trim();
+  if(!q)return;
+  reset();
+
+  const btn=document.getElementById('rb');
+  btn.disabled=true;btn.classList.add('ld');
+
+  show('pipe');show('logs');
+  step('pl','active','running...');
+  addLog(`Query: "${q.length>60?q.slice(0,60)+'…':q}"`,'in');
+  addLog('Planner breaking down query...','pl');
+
+  try{
+    const r=await fetch(`${API}/research`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:q,max_retries:2})
+    });
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();
+    jid=d.job_id;
+    startPoll(btn);
+  }catch(e){
+    showErr(`Cannot reach API server. Make sure it's running:\n\nuvicorn api.main:app --reload --port 8000\n\n${e.message}`);
+    btn.disabled=false;btn.classList.remove('ld');
+  }
+}
+
+function startPoll(btn){
+  const phases=[
+    {ms:1800,fn:()=>{step('pl','done','complete ✓');step('sr','active','searching...');addLog('Searcher agents running in parallel...','sr')}},
+    {ms:3600,fn:()=>{addLog('Fetching and combining results...','sr')}},
+    {ms:5000,fn:()=>{step('sr','done','complete ✓');step('cr','active','evaluating...');addLog('Critic validating research quality...','cr')}},
+    {ms:6500,fn:()=>{step('cr','done','complete ✓');step('sy','active','writing...');addLog('Synthesizer composing final report...','sy')}},
+  ];
+  phases.forEach(p=>setTimeout(p.fn,p.ms));
+
+  poll=setInterval(async()=>{
+    try{
+      const r=await fetch(`${API}/research/${jid}`);
+      const d=await r.json();
+      if(d.status==='done'){
+        clearInterval(poll);
+        step('sy','done','complete ✓');
+        addLog(`Done — ${d.subtask_count} sub-tasks · ${d.sources?.length||0} sources · ${d.duration_seconds}s`,'sy');
+        showResult(d);
+        btn.disabled=false;btn.classList.remove('ld');
+      }else if(d.status==='failed'){
+        clearInterval(poll);
+        ['pl','sr','cr','sy'].forEach(s=>{if(document.getElementById('s-'+s).classList.contains('active'))step(s,'fail','failed')});
+        showErr(d.error||'Research pipeline failed.');
+        btn.disabled=false;btn.classList.remove('ld');
+      }
+    }catch(e){
+      clearInterval(poll);
+      showErr('Lost connection to API.');
+      btn.disabled=false;btn.classList.remove('ld');
+    }
+  },2200);
+}
+
+function showResult(d){
+  raw=d.report||'';
+  document.getElementById('sv-t').textContent=d.subtask_count||'—';
+  document.getElementById('sv-s').textContent=d.sources?.length||'—';
+  document.getElementById('sv-d').textContent=d.duration_seconds?`${d.duration_seconds}s`:'—';
+  document.getElementById('sv-r').textContent=d.retry_count??'—';
+  show('stats');
+
+  document.getElementById('rb2').innerHTML=marked.parse(raw);
+
+  if(d.sources?.length){
+    document.getElementById('src').innerHTML=
+      `<div class="src-lbl">Sources</div>`+
+      d.sources.map((u,i)=>`<div class="src-item"><span class="src-n">${String(i+1).padStart(2,'0')}</span><a class="src-url" href="${u}" target="_blank">${u}</a></div>`).join('');
+  }
+  show('rep');
+}
+
+function showErr(msg){
+  const b=document.getElementById('err');
+  b.textContent=msg;show('err');
+}
+
+function cp(){
+  navigator.clipboard.writeText(raw).then(()=>{
+    const b=document.querySelector('.rep-btn');
+    const orig=b.textContent;b.textContent='Copied!';
+    setTimeout(()=>b.textContent=orig,1500);
+  });
+}
+
+function nr(){
+  if(poll)clearInterval(poll);
+  reset();
+  document.getElementById('q').value='';
+  document.getElementById('q').focus();
+}
+
+document.getElementById('q').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))go();
+});
+</script>
+</body>
+</html>
