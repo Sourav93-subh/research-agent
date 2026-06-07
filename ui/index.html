@@ -300,7 +300,7 @@ textarea::placeholder{color:var(--txt3)}
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-const API='http://127.0.0.1:8000';
+const API=window.location.protocol==='file:'||window.location.hostname==='127.0.0.1'?'http://127.0.0.1:8000':'https://research-agent-production-2bab.up.railway.app';
 let jid=null,poll=null,raw='';
 
 function sq(t){document.getElementById('q').value=t;document.getElementById('q').focus()}
