@@ -44,8 +44,7 @@ async def critic_agent(state: ResearchState) -> ResearchState:
     formatted = _format_results_for_critic(state)
 
     response = await client.chat.completions.create(
-        model="qwen/qwen3.6-27b",
-        extra_body={"thinking": {"type": "disabled"}},
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": CRITIC_SYSTEM},
             {"role": "user", "content": f"Review this research:\n\n{formatted}"},
