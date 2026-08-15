@@ -45,6 +45,7 @@ async def critic_agent(state: ResearchState) -> ResearchState:
 
     response = await client.chat.completions.create(
         model="qwen/qwen3.6-27b",
+        extra_body={"thinking": {"type": "disabled"}},
         messages=[
             {"role": "system", "content": CRITIC_SYSTEM},
             {"role": "user", "content": f"Review this research:\n\n{formatted}"},

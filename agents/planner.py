@@ -33,6 +33,7 @@ async def planner_agent(state: ResearchState) -> ResearchState:
 
     response = await client.chat.completions.create(
         model="qwen/qwen3.6-27b",
+        extra_body={"thinking": {"type": "disabled"}},
         messages=[
             {"role": "system", "content": PLANNER_SYSTEM},
             {"role": "user", "content": f"Research query: {state.user_query}"},
