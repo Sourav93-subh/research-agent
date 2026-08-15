@@ -32,7 +32,7 @@ async def planner_agent(state: ResearchState) -> ResearchState:
     console.log(f"[bold purple]🧠 Planner:[/bold purple] Breaking down query → '{state.user_query}'")
 
     response = await client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[
             {"role": "system", "content": PLANNER_SYSTEM},
             {"role": "user", "content": f"Research query: {state.user_query}"},

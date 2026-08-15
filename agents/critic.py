@@ -44,7 +44,7 @@ async def critic_agent(state: ResearchState) -> ResearchState:
     formatted = _format_results_for_critic(state)
 
     response = await client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[
             {"role": "system", "content": CRITIC_SYSTEM},
             {"role": "user", "content": f"Review this research:\n\n{formatted}"},
