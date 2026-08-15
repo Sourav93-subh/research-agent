@@ -86,7 +86,7 @@ User Query
 | Layer | Technology |
 |-------|-----------|
 | Agent orchestration | LangGraph |
-| LLM | Groq — Llama 3.3 70B |
+| LLM | Groq — gpt-oss-120b |
 | Web search | Tavily |
 | API framework | FastAPI + async |
 | Data validation | Pydantic v2 |
