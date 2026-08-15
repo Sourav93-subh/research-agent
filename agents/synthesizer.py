@@ -57,7 +57,7 @@ async def synthesizer_agent(state: ResearchState) -> ResearchState:
     formatted = _format_results_for_synthesis(state)
 
     response = await client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model="qwen/qwen3.6-27b",
         messages=[
             {"role": "system", "content": SYNTHESIZER_SYSTEM},
             {"role": "user", "content": formatted},
