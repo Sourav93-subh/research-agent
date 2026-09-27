@@ -19,7 +19,7 @@
 
 **Autonomous multi-agent research pipeline powered by LangGraph + Groq**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://research-agent-9pwhw1mm1-sourav93-subhs-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://research-agent-liard-ten.vercel.app)
 [![API](https://img.shields.io/badge/API-Railway-blueviolet?style=for-the-badge&logo=railway)](https://research-agent-production-2bab.up.railway.app/docs)
 [![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)](https://python.org)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.2-orange?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
